@@ -12,7 +12,6 @@ with open('donations.json') as f:
 t = [dt.datetime.strptime(donation["updated_at"], '%Y-%m-%dT%H:%M:%S+01:00') for donation in data["donations"]]
 s = [donation["donated_amount_in_cents"]/100 for donation in data["donations"]]
 
-ax.clear()
 fig.autofmt_xdate()
 ax.grid()
 ax.plot(t, s)
@@ -35,6 +34,23 @@ ax.text(t[-1] + dt.timedelta(minutes=add), 1000000, "1 Mio")
 
 ax.set(xlabel='Uhrzeit', ylabel='Euro', title='Friendly Fire 6 (Zuschauerspenden)')
 
-fig.savefig("donations.png")
-plt.show()
-time.sleep(30)
+fig.savefig("images/donations.png")
+
+ax.clear()
+
+t = [dt.datetime.strptime(donation["updated_at"], '%Y-%m-%dT%H:%M:%S+01:00') for donation in data["donations"] if donation["donations_count"] > 0]
+s = [donation["donations_count"] for donation in data["donations"] if donation["donations_count"] > 0]
+t2 = [dt.datetime.strptime(donation["updated_at"], '%Y-%m-%dT%H:%M:%S+01:00') for donation in data["donations"] if donation["donor_count"] > 0]
+s2 = [donation["donor_count"] for donation in data["donations"] if donation["donor_count"] > 0]
+
+ax.grid()
+ax.plot(t, s, label="Anzahl Spenden")
+ax.plot(t, s2, label="Anzahl Spender")
+ax.legend()
+
+ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+ax.set(xlabel='Uhrzeit', ylabel='Spenden/Spender', title='Friendly Fire 6 (Anzahl Spenden/Spender)')
+
+fig.savefig("images/donors.png")
+
