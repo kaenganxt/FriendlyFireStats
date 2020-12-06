@@ -6,3 +6,5 @@ Das Python-Skript plot.py zeichnet die untenstehenden Grafiken zum Spendenverlau
 
 ![Spendenverlauf](images/donations.png)
 
+![Spender](images/donors.png)
+
