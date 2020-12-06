@@ -19,18 +19,19 @@ ax.plot(t, s)
 ax.ticklabel_format(axis='y', useOffset=False, style='plain')
 
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-#ax.hlines([170000, 300000, 470000, 620000, 640000, 730000, 887491, 1190366], t[0], t[-1], color='orange')
 ax.hlines([170000, 200000, 470000, 620000, 730000, 1000000], t[0], t[-1], color=['orange', 'orange', 'orange', 'orange', 'orange', 'red'])
+#ax.hlines([170000, 200000, 300000, 470000, 620000, 640000, 730000, 887000, 1000000, 1190000], t[0], t[-1], color=['orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'red', 'orange']))
 add = 45
 ax.text(t[-1] + dt.timedelta(minutes=add), 170000, "FF1")
 ax.text(t[-1] + dt.timedelta(minutes=add), 200000, "FF2")
-#ax.text(t[-1] + dt.timedelta(minutes=add), 470000, "FF3 (Zuschauer)")
-#ax.text(t[-1] + dt.timedelta(minutes=add), 620000, "FF4 (Zuschauer)")
+#ax.text(t[-1] + dt.timedelta(minutes=add), 300000, "FF2 (Gesamt)")
 ax.text(t[-1] + dt.timedelta(minutes=add), 470000, "FF3")
-#ax.text(t[-1] + dt.timedelta(minutes=add), 730000, "FF5 (Zuschauer)")
 ax.text(t[-1] + dt.timedelta(minutes=add), 620000, "FF4")
+#ax.text(t[-1] + dt.timedelta(minutes=add), 640000, "FF3 (Gesamt)")
 ax.text(t[-1] + dt.timedelta(minutes=add), 730000, "FF5")
+#ax.text(t[-1] + dt.timedelta(minutes=add), 887000, "FF4 (Gesamt)")
 ax.text(t[-1] + dt.timedelta(minutes=add), 1000000, "1 Mio")
+#ax.text(t[-1] + dt.timedelta(minutes=add), 1190000, "FF5 (Gesamt)")
 
 ax.set(xlabel='Uhrzeit', ylabel='Euro', title='Friendly Fire 6 (Zuschauerspenden)')
 
