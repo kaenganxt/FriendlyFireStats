@@ -79,27 +79,37 @@ async fn data(data: web::Data<AppState>, info: web::Query<DonationRequest>, web:
 }
 
 fn request_thread(donations_store: web::Data<AppState>) {
-    let begin = time::Instant::now();
     let this_year = Utc::now().year();
     loop {
         let now = time::Instant::now();
-        let body = reqwest::blocking::get("https://api.betterplace.org/de/api_v4/fundraising_events/36081.json").unwrap();
-        let res : DonationState = body.json().unwrap();
+        let body = reqwest::blocking::get("https://api.betterplace.org/de/api_v4/fundraising_events/39665.json");
+        match body {
+            Ok(body) => {
+                let res : DonationState = body.json().unwrap();
 
-        // Critical section, will block all donation HTTP requests
-        {
-            let mut writer = donations_store.donations.write().unwrap();
-            let this_year_data = writer.get_mut(&this_year);
-            if this_year_data.is_none() {
-                panic!("No data structure for this year available! Maybe this program ran into the new year?");
+                // Critical section, will block all donation HTTP requests
+                {
+                    let mut writer = donations_store.donations.write().unwrap();
+                    let this_year_data = writer.get_mut(&this_year);
+                    if this_year_data.is_none() {
+                        panic!("No data structure for this year available! Maybe this program ran into the new year?");
+                    }
+                    let last_date = this_year_data.as_ref().unwrap().donations.last();
+                    let add = if let Some(last_date) = last_date {
+                        last_date.updated_at != res.updated_at
+                    } else {
+                        true
+                    };
+                    if add {
+                        this_year_data.unwrap().donations.push(res);
+                    }
+                }
+
+                let res = serde_json::to_string_pretty(&donations_store.donations.read().unwrap().get(&this_year)).unwrap();
+                fs::write(format!("donations_{}.json", this_year), res).unwrap();
             }
-
-            //this_year_data.unwrap().donations.push(res);
-            this_year_data.unwrap().donations.push(DonationState { donations_count: 10, donor_count: 10, donated_amount_in_cents: begin.elapsed().as_secs() * 1000, updated_at: Utc::now().to_rfc2822()});
+            Err(e) => println!("Failed to request donation API: {}", e)
         }
-
-        let res = serde_json::to_string_pretty(&donations_store.donations.read().unwrap().get(&this_year)).unwrap();
-        fs::write(format!("donations_{}.json", this_year), res).unwrap();
 
         let one_minute = time::Duration::from_secs(60);
         thread::sleep(one_minute - now.elapsed());

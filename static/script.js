@@ -12,13 +12,9 @@ let yearsLoaded = [currentYear];
 let data = {};
 let chart;
 
+let day_diffs = {2020: -1};
+
 function createChart() {
-    ajax('https://cdn.jsdelivr.net/npm/apexcharts/dist/locales/de.json').then(function(de) {
-        chart.w.config.chart.defaultLocale = "de";
-        chart.w.config.chart.locales = [de];
-        chart.setLocale("de");
-        chart.render();
-    });
     let options = {
         series: [],
         chart: {
@@ -37,6 +33,12 @@ function createChart() {
             },
             zoom: {
                 enabled: true
+            },
+            selection: {
+                xaxis: {
+                    min: Date.parse('04 Dec ' + currentYear + ' 12:00:00 CET'),
+                    max: Date.parse('05 Dec ' + currentYear + ' 12:00:00 CET'),
+                }
             }
         },
         dataLabels: {
@@ -180,12 +182,15 @@ function updateChart(year) {
     let render_data = [];
     for (let date of data[year]) {
         let date_date = new Date(date.updated_at);
-        date_date.setFullYear(2000);
-        date_date.setMonth(1);
-        if (date_date.getHours() < 12) {
-            date_date.setDate(2);
-        } else {
-            date_date.setDate(1);
+        // Adjust day difference so the lines can overlap
+        if (year != currentYear) {
+            let new_date = date_date.getDate() + day_diffs[year];
+            if (new_date < 1) {
+                date_date.setMonth(date_date.getMonth() - 1);
+                new_date = 30 + new_date;
+            }
+            date_date.setDate(new_date);
+            date_date.setFullYear(currentYear);
         }
         render_data.push([date_date, date.donated_amount_in_cents / 100]);
     }
