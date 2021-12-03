@@ -18,7 +18,8 @@ function createChart() {
     let options = {
         series: [],
         chart: {
-            id: 'realtime',
+            id: 'donation_amount',
+            group: "friendlyfire",
             height: 350,
             type: 'line',
             animations: {
@@ -36,16 +37,18 @@ function createChart() {
             },
             selection: {
                 xaxis: {
-                    min: Date.parse('04 Dec ' + currentYear + ' 12:00:00 CET'),
-                    max: Date.parse('05 Dec ' + currentYear + ' 12:00:00 CET'),
+                    min: Date.parse(currentYear + '-12-04T12:00:00+01:00'),
+                    max: Date.parse(currentYear + '-12-05T12:00:00+01:00'),
                 }
             }
         },
+        colors: ["#faa422", "#35B289"],
         dataLabels: {
             enabled: false
         },
         stroke: {
-            curve: 'smooth'
+            curve: 'stepline',
+            dashArray: [0, 8],
         },
         title: {
             text: 'Friendly Fire Spendenfortschritt',
@@ -58,6 +61,7 @@ function createChart() {
             type: 'datetime'
         },
         yaxis: {
+            opposite: true,
             labels: {
                 formatter: function (value) {
                     if (!value) {
@@ -89,85 +93,93 @@ function createChart() {
         },
         theme: {
             mode: "light",
-            monochrome: {
-                enabled: true,
-                color: "#faa422",
-
-            }
+            palette: 'palette1'
         },
         annotations: {
             yaxis: [
             {
                 y: 170000,
-                borderColor: '#D27E05',
+                borderColor: '#038C5F',
                 label: {
-                    borderColor: '#D27E05',
+                    borderWidth: 0,
+                    position: "left",
                     style: {
                         color: '#fff',
-                        background: '#D27E05'
+                        background: '#038C5F'
                     },
                     text: 'Friendly Fire 1',
-                    offsetY: 15
+                    offsetY: 15,
+                    offsetX: 75
                 }
             },
             {
                 y: 200000,
-                borderColor: '#D27E05',
+                borderColor: '#038C5F',
                 label: {
-                borderColor: '#D27E05',
-                style: {
-                    color: '#fff',
-                    background: '#D27E05'
-                },
-                text: 'Friendly Fire 2'
+                    borderWidth: 0,
+                    position: "left",
+                    style: {
+                        color: '#fff',
+                        background: '#038C5F'
+                    },
+                    text: 'Friendly Fire 2',
+                    offsetX: 75
                 }
             },
             {
                 y: 470000,
-                borderColor: '#D27E05',
+                borderColor: '#038C5F',
                 label: {
-                borderColor: '#D27E05',
-                style: {
-                    color: '#fff',
-                    background: '#D27E05'
-                },
-                text: 'Friendly Fire 3'
+                    borderWidth: 0,
+                    position: "left",
+                    style: {
+                        color: '#fff',
+                        background: '#038C5F'
+                    },
+                    text: 'Friendly Fire 3',
+                    offsetX: 75
                 }
             },
             {
                 y: 620000,
-                borderColor: '#D27E05',
+                borderColor: '#038C5F',
                 label: {
-                borderColor: '#D27E05',
-                style: {
-                    color: '#fff',
-                    background: '#D27E05'
-                },
-                text: 'Friendly Fire 4'
+                    borderWidth: 0,
+                    position: "left",
+                    style: {
+                        color: '#fff',
+                        background: '#038C5F'
+                    },
+                    text: 'Friendly Fire 4',
+                    offsetX: 75
                 }
             },
             {
                 y: 730000,
-                borderColor: '#D27E05',
+                borderColor: '#038C5F',
                 label: {
-                borderColor: '#D27E05',
-                style: {
-                    color: '#fff',
-                    background: '#D27E05'
-                },
-                text: 'Friendly Fire 5'
+                    borderWidth: 0,
+                    position: "left",
+                    style: {
+                        color: '#fff',
+                        background: '#038C5F'
+                    },
+                    text: 'Friendly Fire 5',
+                    offsetX: 75
                 }
             },
             {
                 y: 1052548,
-                borderColor: '#fab142',
+                borderColor: '#35B289',
                 label: {
-                borderColor: '#fab142',
-                style: {
-                    color: '#fff',
-                    background: '#fab142'
-                },
-                text: 'Friendly Fire 6'
+                    borderWidth: 0,
+                    position: "left",
+                    style: {
+                        color: '#fff',
+                        background: '#35B289'
+                    },
+                    text: 'Friendly Fire 6',
+                    offsetX: 75
                 }
             }
             ]
@@ -197,15 +209,18 @@ function updateChart(year) {
 
     let series = chart.w.config.series;
     let newData = [];
-    for (let data of series) {
-        if (data.name != year) {
-            newData.push(data);
+    let oldId = series.length;
+    for (let id in series) {
+        if (series[id].name != year) {
+            newData[id] = series[id];
+        } else {
+            oldId = id;
         }
     }
-    newData.push({
+    newData[oldId] = {
         name: year,
         data: render_data
-    });
+    };
 
     chart.updateSeries(newData);
 }
