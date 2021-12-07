@@ -1,9 +1,16 @@
 document.addEventListener("DOMContentLoaded", function() {
 
+    document.getElementById("streamShortcut").addEventListener("click", function(e) {
+        e.preventDefault();
+
+        chart.zoomX(Date.parse('2021-12-04T12:00:00+01:00'), Date.parse('2021-12-05T04:00:00+01:00'));
+        chart2.zoomX(Date.parse('2021-12-04T12:00:00+01:00'), Date.parse('2021-12-05T04:00:00+01:00'));
+    });
+
     getSupportedYears();
     updateData();
     createChart();
-    setInterval(updateData, 1000 * 60 * 2);
+    //setInterval(updateData, 1000 * 60);
 });
 
 let lastRequest = new Date();
@@ -11,6 +18,7 @@ let currentYear = lastRequest.getFullYear();
 let yearsLoaded = [currentYear];
 let data = {};
 let chart;
+let chart2;
 
 let day_diffs = {2020: -1};
 
@@ -30,16 +38,10 @@ function createChart() {
                 }
             },
             toolbar: {
-                show: true
+                show: true,
             },
             zoom: {
-                enabled: true
-            },
-            selection: {
-                xaxis: {
-                    min: Date.parse(currentYear + '-12-04T12:00:00+01:00'),
-                    max: Date.parse(currentYear + '-12-05T12:00:00+01:00'),
-                }
+                enabled: true,
             }
         },
         colors: ["#faa422", "#35B289"],
@@ -48,21 +50,25 @@ function createChart() {
         },
         stroke: {
             curve: 'stepline',
-            dashArray: [0, 8],
+            dashArray: [0, 4],
         },
         title: {
-            text: 'Friendly Fire Spendenfortschritt',
+            text: 'Spendenfortschritt',
             align: 'left'
         },
         markers: {
             size: 0
         },
         xaxis: {
-            type: 'datetime'
+            type: 'datetime',
+            labels: {
+                datetimeUTC: false
+            }
         },
         yaxis: {
             opposite: true,
             labels: {
+                align: "right",
                 formatter: function (value) {
                     if (!value) {
                         return value + " €";
@@ -88,7 +94,7 @@ function createChart() {
         },
         tooltip: {
             x: {
-                format: "HH:mm"
+                format: "dd.M HH:mm"
             }
         },
         theme: {
@@ -186,12 +192,86 @@ function createChart() {
         }
     };
 
+    let options2 = {
+        series: [],
+        chart: {
+            id: 'donation_count',
+            group: "friendlyfire",
+            height: 350,
+            type: 'line',
+            animations: {
+                enabled: true,
+                easing: 'easein',
+                dynamicAnimation: {
+                    speed: 500
+                }
+            },
+            toolbar: {
+                show: false
+            },
+            zoom: {
+                enabled: true,
+            }
+        },
+        colors: ["#faa422", "#35B289"],
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'stepline',
+            dashArray: [0, 0, 4, 4],
+        },
+        title: {
+            text: 'Anzahl der Spenden und Spender',
+            align: 'left'
+        },
+        markers: {
+            size: 0
+        },
+        xaxis: {
+            type: 'datetime',
+            labels: {
+                datetimeUTC: false
+            }
+        },
+        yaxis: {
+            opposite: true,
+            labels: {
+                align: "right"
+            }
+        },
+        legend: {
+            show: false
+        },
+        grid: {
+            xaxis: {
+                lines: {
+                    show: true
+                }
+            }
+        },
+        tooltip: {
+            x: {
+                format: "dd.M HH:mm"
+            }
+        },
+        theme: {
+            mode: "light",
+            palette: 'palette1'
+        }
+    };
+
     chart = new ApexCharts(document.querySelector("#donations"), options);
     chart.render();
+
+    chart2 = new ApexCharts(document.querySelector("#donation_count"), options2);
+    chart2.render();
 }
 
 function updateChart(year) {
     let render_data = [];
+    let render_data_donations = [];
+    let render_data_donors = [];
     for (let date of data[year]) {
         let date_date = new Date(date.updated_at);
         // Adjust day difference so the lines can overlap
@@ -205,9 +285,13 @@ function updateChart(year) {
             date_date.setFullYear(currentYear);
         }
         render_data.push([date_date, date.donated_amount_in_cents / 100]);
+        render_data_donations.push([date_date, date.donations_count]);
+        render_data_donors.push([date_date, date.donor_count]);
     }
 
     let series = chart.w.config.series;
+    let series_donations = chart2.w.config.series;
+
     let newData = [];
     let oldId = series.length;
     for (let id in series) {
@@ -222,7 +306,30 @@ function updateChart(year) {
         data: render_data
     };
 
-    chart.updateSeries(newData);
+    chart.updateHelpers._updateSeries(newData, true);
+
+    let newData2 = [];
+    let donations_oldId = series_donations.length;
+    let donors_oldId = series_donations.length+1;
+    for (let id in series_donations) {
+        if (series_donations[id].name == year + "_donations") {
+            donations_oldId = id;
+        } else if (series_donations[id].name == year + "_donors") {
+            donors_oldId = id;
+        } else {
+            newData2[id] = series_donations[id];
+        }
+    }
+    newData2[donations_oldId] = {
+        name: year + "_donations",
+        data: render_data_donations
+    };
+    newData2[donors_oldId] = {
+        name: year + "_donors",
+        data: render_data_donors
+    };
+
+    chart2.updateHelpers._updateSeries(newData2, true);
 }
 
 function setSeriesVisibility(year, visible) {
@@ -234,8 +341,13 @@ function setSeriesVisibility(year, visible) {
     }
     if (visible) {
         chart.showSeries(year);
+        chart2.showSeries(year + "_donations");
+        chart2.showSeries(year + "_donors");
+        updateChart(year);
     } else {
         chart.hideSeries(year);
+        chart2.hideSeries(year + "_donations");
+        chart2.hideSeries(year + "_donors");
     }
 }
 
@@ -257,6 +369,14 @@ function updateData(year) {
             updateChart(year);
             if (yearsLoaded.indexOf(year) == -1) {
                 yearsLoaded.push(year);
+            }
+
+            if (year == currentYear) {
+                let latest = response.donations[response.donations.length - 1];
+                let amount = latest.donated_amount_in_cents;
+                let str = (amount / 100) + " €";
+                str = str.replace(".", ",");
+                document.getElementById("currentAmount").innerText = str;
             }
         }
     });

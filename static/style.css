@@ -1,12 +1,31 @@
-#donations {
+.graph {
     max-width: 50%;
     margin:auto;
 }
 
 body {
     text-align: center;
+    font-family: sans-serif;
 }
 
 a, a:visited, a:hover {
     color:blue;
+}
+
+#years {
+    padding-left: 0;
+}
+
+#years li {
+    list-style-type: none;
+}
+
+#currentAmount {
+    font-weight: bold;
+}
+
+@media (max-width: 1000px) {
+    .graph {
+        max-width: 100%;
+    }
 }
