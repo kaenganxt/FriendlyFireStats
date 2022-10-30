@@ -3,7 +3,6 @@ use serde::Serialize;
 use serde::Deserialize;
 use chrono::DateTime;
 use chrono::Utc;
-use std::sync::mpsc;
 use std::thread;
 use std::io;
 
@@ -63,7 +62,8 @@ async fn year_list(state: web::Data<AppState>) -> impl Responder {
 }
 
 #[get("/donations/{year}")]
-async fn data(data: web::Data<AppState>, info: web::Query<DonationRequest>, web::Path(year): web::Path<i32>) -> impl Responder {
+async fn data(data: web::Data<AppState>, info: web::Query<DonationRequest>, path: web::Path<i32>) -> impl Responder {
+    let year = path.into_inner();
     let last_static_update = data.static_updated.read().unwrap();
     let state = if info.last_request.is_some() && info.last_request.unwrap() < *last_static_update {
         ResponseState::RELOAD
@@ -122,8 +122,7 @@ fn request_thread(donations_store: web::Data<AppState>) {
     }
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
+fn main() -> std::io::Result<()> {
 
     WriteLogger::init(LevelFilter::Info, Config::default(), File::create("donations_web.log").unwrap()).unwrap();
 
@@ -132,28 +131,25 @@ async fn main() -> std::io::Result<()> {
     let mut years = HashMap::new();
     for year in 2020..=this_year {
         let file = File::open(format!("donations_{}.json", year));
-        if file.is_ok() {
-            let donations_read = serde_json::from_reader(file.unwrap()).expect("JSON was not well-formatted (Reading input file)");
+        if let Ok(file) = file {
+            let donations_read = serde_json::from_reader(file).expect("JSON was not well-formatted (Reading input file)");
             years.insert(year, donations_read);
         }
     }
 
     println!("Loaded supported years: {:?}", years.keys());
 
-    if !years.contains_key(&this_year) {
-        years.insert(this_year, Donations { donations: vec![] });
-    }
+    years.entry(this_year).or_insert_with(|| Donations { donations: vec![] });
 
     let static_updated = RwLock::new(Utc::now());
     let donations: web::Data<AppState> = web::Data::new(AppState { donations: RwLock::new(years), static_updated });
 
     let donations_copy = donations.clone();
 
-    let (tx, rx) = mpsc::channel();
     thread::spawn(move || {
-        let sys = System::new("http-server");
+        let sys = System::new();
 
-        let srv = HttpServer::new(move || {
+        let server = HttpServer::new(move || {
             App::new()
                 .app_data(donations_copy.clone())
                 .wrap(Logger::new("%r -> %s (took %Ts)"))
@@ -161,17 +157,15 @@ async fn main() -> std::io::Result<()> {
                 .service(Files::new("/", "static").index_file("index.html"))
         })
         .bind("0.0.0.0:8080")?
-        .shutdown_timeout(30)
+        .shutdown_timeout(15)
         .run();
 
-        let _ = tx.send(srv);
-        sys.run()
+        sys.block_on(server)
     });
 
     /*let donations_copy = donations.clone();
     thread::spawn(move || request_thread(donations_copy));
 */
-    let srv = rx.recv().unwrap();
 
     println!("Server started. Starting CLI.");
     let mut line;
@@ -180,16 +174,14 @@ async fn main() -> std::io::Result<()> {
         io::stdout().flush().unwrap();
         line = String::new();
         let res = io::stdin().read_line(&mut line);
-        if !res.is_ok() {
+        if res.is_err() {
             println!("Invalid input");
             continue;
         } else if res.unwrap() == 0 {
             println!("EOF, stopping...");
-            srv.stop(true).await;
             break;
         } else if line == "stop\n" || line == "exit\n" || line == "quit\n" || line == "q\n" {
             println!("Stopping...");
-            srv.stop(true).await;
             break;
         } else if line == "reload\n" {
             println!("Queueing reload...");

@@ -1,21 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
     <head>
         <title>FriendlyFire Spendenstatistik</title>
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <script src="https://code.highcharts.com/highcharts.js"></script>
         <script src="/script.js"></script>
         <meta charset="utf-8"/>
         <meta name=viewport content="width=device-width, initial-scale=1"/>
         <link rel="stylesheet" type="text/css" href="/style.css" media="screen" />
     </head>
     <body>
-        <h1>Spendenstatistik für Friendly Fire 7<br/>
-            <a href="https://www.betterplace.org/de/fundraising-events/39665-friendly-fire-7" target="_blank">SPENDEN</a> | 
-            <a href="https://www.twitch.tv/gronkh" target="_blank">STREAM</a></h1>
+        <h1>Spendenstatistik für Friendly Fire 8<br/>
+            <a href="#" target="_blank">SPENDEN</a> |
+            <a href="https://www.twitch.tv/pietsmiet" target="_blank">STREAM</a></h1>
             Aktueller Stand: <span id="currentAmount"></span>
-        <div id="yearWrapper"><ul id="years"><li>Lädt...</li></ul></div>
-        <div id="shortcutWrapper"><a href='#' id="streamShortcut">Auf Stream-Zeit zoomen</a></div>
+        <div id="shortcutWrapper"><a href='#' id="streamShortcut">Gesamten Verlauf anzeigen</a></div>
+        <br />
         <div id="donations" class="graph"></div>
         <div id="donation_count" class="graph"></div>
+        <br style="height:5em" />
+        <div id="tools">
+            Made by <a href="https://twitter.com/kaenganxt" target="_blank">@kaenganxt</a> |
+            <a href="https://github.com/kaenganxt/FriendlyFireStats" target="_blank">Source Code</a> |
+            <span id="toggleColor">Dark mode</span>
+        </div>
     </body>
 </html>
