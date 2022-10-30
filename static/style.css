@@ -8,10 +8,6 @@ body {
     font-family: sans-serif;
 }
 
-a, a:visited, a:hover {
-    color:blue;
-}
-
 #years {
     padding-left: 0;
 }
@@ -24,8 +20,52 @@ a, a:visited, a:hover {
     font-weight: bold;
 }
 
+#tools {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    height: 30px;
+    padding-top: 5px;
+    width: 400px;
+    border-top-left-radius: 10px;
+}
+
+#toggleColor {
+    cursor:pointer;
+    text-decoration: underline;
+}
+
 @media (max-width: 1000px) {
     .graph {
         max-width: 100%;
     }
+}
+
+/* Dark theme */
+body.dark {
+    background-color: #222;
+    color: #DDD;
+}
+
+.dark a, .dark a:visited, .dark a:hover, .dark #toggleColor {
+    color:#44f;
+}
+
+.dark #tools {
+    background-color: #333;
+    box-shadow: -1px -1px 10px 5px #333;
+}
+
+/* Bright theme */
+body {
+    background-color: white;
+}
+
+a, a:visited, a:hover, #toggleColor {
+    color:blue;
+}
+
+#tools {
+    background-color: #CCC;
+    box-shadow: -1px -1px 10px 5px #CCC;
 }
