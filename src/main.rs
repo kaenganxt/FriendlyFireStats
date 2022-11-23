@@ -78,12 +78,11 @@ async fn data(data: web::Data<AppState>, info: web::Query<DonationRequest>, path
     }
 }
 
-#[allow(dead_code)]
 fn request_thread(donations_store: web::Data<AppState>) {
     let this_year = Utc::now().year();
     loop {
         let now = time::Instant::now();
-        let body = reqwest::blocking::get("https://api.betterplace.org/de/api_v4/fundraising_events/39665.json");
+        let body = reqwest::blocking::get("https://api.betterplace.org/de/api_v4/fundraising_events/42942.json");
         match body {
             Ok(body) => {
                 let res : Result<DonationState, _> = body.json();
@@ -163,9 +162,8 @@ fn main() -> std::io::Result<()> {
         sys.block_on(server)
     });
 
-    /*let donations_copy = donations.clone();
+    let donations_copy = donations.clone();
     thread::spawn(move || request_thread(donations_copy));
-*/
 
     println!("Server started. Starting CLI.");
     let mut line;
