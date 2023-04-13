@@ -8,6 +8,7 @@ use std::io;
 
 use std::fs;
 use std::fs::File;
+use std::time::Duration;
 use actix_files::Files;
 use std::sync::RwLock;
 use std::io::Write;
@@ -53,6 +54,8 @@ struct AppState {
     donations: RwLock<HashMap<i32, Donations>>,
     static_updated: RwLock<DateTime<Utc>>,
 }
+
+const DATA_DIR: &'static str = "data";
 
 #[get("/years")]
 async fn year_list(state: web::Data<AppState>) -> impl Responder {
@@ -108,7 +111,7 @@ fn request_thread(donations_store: web::Data<AppState>) {
                         }
 
                         let res = serde_json::to_string_pretty(&donations_store.donations.read().unwrap().get(&this_year)).unwrap();
-                        fs::write(format!("donations_{}.json", this_year), res).unwrap();
+                        fs::write(format!("{DATA_DIR}/donations_{this_year}.json"), res).unwrap();
                     }
                     Err(e) => println!("Failed to parse API response: {}", e)
                 }
@@ -129,7 +132,7 @@ fn main() -> std::io::Result<()> {
 
     let mut years = HashMap::new();
     for year in 2020..=this_year {
-        let file = File::open(format!("donations_{}.json", year));
+        let file = File::open(format!("{DATA_DIR}/donations_{year}.json"));
         if let Ok(file) = file {
             let donations_read = serde_json::from_reader(file).expect("JSON was not well-formatted (Reading input file)");
             years.insert(year, donations_read);
@@ -167,17 +170,17 @@ fn main() -> std::io::Result<()> {
 
     println!("Server started. Starting CLI.");
     let mut line;
+    print!("> ");
+    io::stdout().flush().unwrap();
     loop {
-        print!("> ");
-        io::stdout().flush().unwrap();
         line = String::new();
         let res = io::stdin().read_line(&mut line);
         if res.is_err() {
             println!("Invalid input");
             continue;
         } else if res.unwrap() == 0 {
-            println!("EOF, stopping...");
-            break;
+            thread::sleep(Duration::from_millis(100));
+            continue;
         } else if line == "stop\n" || line == "exit\n" || line == "quit\n" || line == "q\n" {
             println!("Stopping...");
             break;
@@ -188,6 +191,8 @@ fn main() -> std::io::Result<()> {
         } else {
             println!("Unknown command. Known commands include reload and stop.");
         }
+        print!("> ");
+        io::stdout().flush().unwrap();
     }
     Ok(())
 }
