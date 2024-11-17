@@ -249,7 +249,7 @@ document.addEventListener("DOMContentLoaded", function() {
             chart.xAxis[0].setExtremes(null, null);
             switchButton.innerText = "Auf Stream-Zeit zoomen";
         } else {
-            chart.xAxis[0].setExtremes(Date.parse('2022-12-03T12:00:00+01:00').valueOf(), Date.parse('2022-12-04T04:00:00+01:00').valueOf());
+            chart.xAxis[0].setExtremes(Date.parse('2024-12-07T12:00:00+01:00').valueOf(), Date.parse('2024-12-08T04:00:00+01:00').valueOf());
             switchButton.innerText = "Gesamten Verlauf anzeigen";
         }
         onlyStream = !onlyStream;
@@ -257,7 +257,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     getSupportedYears();
     createChart();
-    chart.xAxis[0].setExtremes(Date.parse('2022-12-03T12:00:00+01:00').valueOf(), Date.parse('2022-12-04T04:00:00+01:00').valueOf());
+    chart.xAxis[0].setExtremes(Date.parse('2024-12-07T12:00:00+01:00').valueOf(), Date.parse('2024-12-08T04:00:00+01:00').valueOf());
     setInterval(updateData, 1000 * 60);
 });
 
@@ -267,9 +267,9 @@ let data = {};
 let chart;
 let chart2;
 
-let day_diffs = {2020: -2, 2021: -1};
+let day_diffs = {2020: 2, 2021: 3, 2022: 4, 2023: 5};
 //let colors = {2020: ["#743546", "#512531"], 2021: ["#f9ac3b", "#f8970a"], 2022: ["#75aca5", "#59958d"]};
-let colors = {2020: "#75aca5", 2021: "#f9ac3b", 2022: "#743546"};
+let colors = {2020: "#75aca5", 2021: "#f9ac3b", 2022: "#743546", 2023: "#297369", 2024: "#334D79"};
 
 function createChart() {
 
@@ -350,7 +350,7 @@ function createChart() {
                     value: 125000,
                     dashStyle: "shortdash"
                 },
-                {
+                /*{
                     label: {
                         text: "Friendly Fire 2",
                         style: {
@@ -369,7 +369,7 @@ function createChart() {
                     },
                     value: 477000,
                     dashStyle: "shortdash"
-                },
+                },*/
                 {
                     label: {
                         text: "Friendly Fire 4",
@@ -380,7 +380,7 @@ function createChart() {
                     value: 620000,
                     dashStyle: "shortdash"
                 },
-                {
+                /*{
                     label: {
                         text: "Friendly Fire 5",
                         style: {
@@ -389,7 +389,7 @@ function createChart() {
                     },
                     value: 730000,
                     dashStyle: "shortdash"
-                },
+                },*/
                 {
                     label: {
                         text: "Friendly Fire 6",
@@ -400,14 +400,34 @@ function createChart() {
                     value: 1052548,
                     dashStyle: "shortdash"
                 },
-                {
+                /*{
                     label: {
                         text: "Friendly Fire 7",
                         style: {
                             color: textColor
                         }
                     },
-                    value: 1284386,
+                    value: 1335076,
+                    dashStyle: "shortdash"
+                },*/
+                {
+                    label: {
+                        text: "Friendly Fire 8",
+                        style: {
+                            color: textColor
+                        }
+                    },
+                    value: 1610755,
+                    dashStyle: "shortdash"
+                },
+                {
+                    label: {
+                        text: "Friendly Fire 9",
+                        style: {
+                            color: textColor
+                        }
+                    },
+                    value: 1021417,
                     dashStyle: "shortdash"
                 }
             ]
@@ -485,8 +505,10 @@ function updateChart(year) {
 
     if (series) {
         series.setData(render_data);
-        count.setData(render_data_donations);
-        donors.setData(render_data_donors);
+        if (year !== 2023) {
+            count.setData(render_data_donations);
+            donors.setData(render_data_donors);
+        }
     } else {
         chart.addSeries({
             data: render_data,
@@ -495,21 +517,23 @@ function updateChart(year) {
             legendIndex: year - 2020,
             color: colors[year]
         });
-        chart2.addSeries({
-            data: render_data_donations,
-            id: year + "_count",
-            name: year + " Spenden",
-            legendIndex: (year - 2020) * 2,
-            color: colors[year]
-        });
-        chart2.addSeries({
-            data: render_data_donors,
-            id: year + "_donors",
-            name: year + " Spender",
-            legendIndex: (year - 2020) * 2 + 1,
-            dashStyle: "shortdot",
-            color: colors[year]
-        });
+        if (year !== 2023) {
+            chart2.addSeries({
+                data: render_data_donations,
+                id: year + "_count",
+                name: year + " Spenden",
+                legendIndex: (year - 2020) * 2,
+                color: colors[year]
+            });
+            chart2.addSeries({
+                data: render_data_donors,
+                id: year + "_donors",
+                name: year + " Spender",
+                legendIndex: (year - 2020) * 2 + 1,
+                dashStyle: "shortdot",
+                color: colors[year]
+            });
+        }
     }
 }
 
