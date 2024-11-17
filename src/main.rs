@@ -18,7 +18,7 @@ use std::collections::HashMap;
 use actix_web::middleware::Logger;
 use std::time;
 
-use simplelog::{WriteLogger, Config, LevelFilter};
+use simplelog::{WriteLogger, Config, LevelFilter, CombinedLogger, SimpleLogger, TermLogger, TerminalMode, ColorChoice};
 
 #[derive(Serialize)]
 enum ResponseState {
@@ -126,7 +126,10 @@ fn request_thread(donations_store: web::Data<AppState>) {
 
 fn main() -> std::io::Result<()> {
 
-    WriteLogger::init(LevelFilter::Info, Config::default(), File::create("donations_web.log")?).unwrap();
+    CombinedLogger::init(vec![
+        WriteLogger::new(LevelFilter::Info, Config::default(), File::create("donations_web.log")?),
+        TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
+    ]).unwrap();
 
     let this_year = Utc::now().year();
 
@@ -171,14 +174,14 @@ fn main() -> std::io::Result<()> {
     println!("Server started. Starting CLI.");
     let mut line;
     print!("> ");
-    io::stdout().flush().unwrap();
+    io::stdout().flush()?;
     loop {
         line = String::new();
         let res = io::stdin().read_line(&mut line);
         if res.is_err() {
             println!("Invalid input");
             continue;
-        } else if res.unwrap() == 0 {
+        } else if res? == 0 {
             thread::sleep(Duration::from_millis(100));
             continue;
         } else if line == "stop\n" || line == "exit\n" || line == "quit\n" || line == "q\n" {
@@ -192,7 +195,7 @@ fn main() -> std::io::Result<()> {
             println!("Unknown command. Known commands include reload and stop.");
         }
         print!("> ");
-        io::stdout().flush().unwrap();
+        io::stdout().flush()?;
     }
     Ok(())
 }

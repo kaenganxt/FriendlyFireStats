@@ -212,6 +212,17 @@ function getCookie(name) {
     return null;
 }
 
+function updateChartArea(onlyStream, streamFrom, streamTo) {
+    const switchButton = document.getElementById("streamShortcut");
+    if (onlyStream) {
+        chart.xAxis[0].setExtremes(streamFrom.valueOf(), streamTo.valueOf());
+        switchButton.innerText = "Gesamten Verlauf anzeigen";
+    } else {
+        chart.xAxis[0].setExtremes(null, null);
+        switchButton.innerText = "Auf Stream-Zeit zoomen";
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
 
     let dark;
@@ -239,25 +250,24 @@ document.addEventListener("DOMContentLoaded", function() {
         window.location.reload();
     });
 
-    let onlyStream = true;
+    const streamFrom = Date.parse('2024-12-07T12:00:00+01:00');
+    const streamTo = Date.parse('2024-12-08T04:00:00+01:00');
+
+    const now = Date.now();
+    let onlyStream = now > streamFrom && now < streamTo;
 
     let switchButton = document.getElementById("streamShortcut");
 
     switchButton.addEventListener("click", function(e) {
         e.preventDefault();
-        if (onlyStream) {
-            chart.xAxis[0].setExtremes(null, null);
-            switchButton.innerText = "Auf Stream-Zeit zoomen";
-        } else {
-            chart.xAxis[0].setExtremes(Date.parse('2024-12-07T12:00:00+01:00').valueOf(), Date.parse('2024-12-08T04:00:00+01:00').valueOf());
-            switchButton.innerText = "Gesamten Verlauf anzeigen";
-        }
         onlyStream = !onlyStream;
+        updateChartArea(onlyStream, streamFrom, streamTo);
     });
 
     getSupportedYears();
     createChart();
-    chart.xAxis[0].setExtremes(Date.parse('2024-12-07T12:00:00+01:00').valueOf(), Date.parse('2024-12-08T04:00:00+01:00').valueOf());
+    updateChartArea(onlyStream, streamFrom, streamTo);
+
     setInterval(updateData, 1000 * 60);
 });
 
@@ -389,7 +399,7 @@ function createChart() {
                     },
                     value: 730000,
                     dashStyle: "shortdash"
-                },*/
+                },
                 {
                     label: {
                         text: "Friendly Fire 6",
@@ -399,27 +409,27 @@ function createChart() {
                     },
                     value: 1052548,
                     dashStyle: "shortdash"
-                },
-                /*{
+                },*/
+                {
                     label: {
                         text: "Friendly Fire 7",
                         style: {
                             color: textColor
                         }
                     },
-                    value: 1335076,
+                    value: 1284386,
                     dashStyle: "shortdash"
-                },*/
-                {
+                },
+                /*{
                     label: {
                         text: "Friendly Fire 8",
                         style: {
                             color: textColor
                         }
                     },
-                    value: 1610755,
+                    value: 1048614,
                     dashStyle: "shortdash"
-                },
+                },*/
                 {
                     label: {
                         text: "Friendly Fire 9",
@@ -427,7 +437,7 @@ function createChart() {
                             color: textColor
                         }
                     },
-                    value: 1021417,
+                    value: 1021778,
                     dashStyle: "shortdash"
                 }
             ]
