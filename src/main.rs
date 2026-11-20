@@ -18,7 +18,7 @@ use std::collections::HashMap;
 use actix_web::middleware::Logger;
 use std::time;
 
-use simplelog::{WriteLogger, Config, LevelFilter, CombinedLogger, SimpleLogger, TermLogger, TerminalMode, ColorChoice};
+use simplelog::{WriteLogger, Config, LevelFilter, CombinedLogger, TermLogger, TerminalMode, ColorChoice};
 
 #[derive(Serialize)]
 enum ResponseState {
@@ -85,7 +85,7 @@ fn request_thread(donations_store: web::Data<AppState>) {
     let this_year = Utc::now().year();
     loop {
         let now = time::Instant::now();
-        let body = reqwest::blocking::get("https://api.betterplace.org/de/api_v4/fundraising_events/47806.json");
+        let body = reqwest::blocking::get("https://api.betterplace.org/de/api_v4/fundraising_events/57891.json");
         match body {
             Ok(body) => {
                 let res : Result<DonationState, _> = body.json();

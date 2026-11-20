@@ -250,8 +250,8 @@ document.addEventListener("DOMContentLoaded", function() {
         window.location.reload();
     });
 
-    const streamFrom = Date.parse('2024-12-07T12:00:00+01:00');
-    const streamTo = Date.parse('2024-12-08T04:00:00+01:00');
+    const streamFrom = Date.parse('2026-12-05T12:00:00+01:00');
+    const streamTo = Date.parse('2026-12-06T04:00:00+01:00');
 
     const now = Date.now();
     let onlyStream = now > streamFrom && now < streamTo;
@@ -264,8 +264,8 @@ document.addEventListener("DOMContentLoaded", function() {
         updateChartArea(onlyStream, streamFrom, streamTo);
     });
 
-    getSupportedYears();
     createChart();
+    getSupportedYears();
     updateChartArea(onlyStream, streamFrom, streamTo);
 
     setInterval(updateData, 1000 * 60);
@@ -277,9 +277,9 @@ let data = {};
 let chart;
 let chart2;
 
-let day_diffs = {2020: 2, 2021: 3, 2022: 4, 2023: 5};
+let day_diffs = {2020: 0, 2021: 1, 2022: 2, 2023: 3, 2024: -2, 2025: -1};
 //let colors = {2020: ["#743546", "#512531"], 2021: ["#f9ac3b", "#f8970a"], 2022: ["#75aca5", "#59958d"]};
-let colors = {2020: "#75aca5", 2021: "#f9ac3b", 2022: "#743546", 2023: "#297369", 2024: "#334D79"};
+let colors = {2020: "#75aca5", 2021: "#f9ac3b", 2022: "#743546", 2023: "#297369", 2024: "#334D79", 2025: "#75aca5", 2026: "#f9ac3b"};
 
 function createChart() {
 
@@ -429,7 +429,7 @@ function createChart() {
                     },
                     value: 1048614,
                     dashStyle: "shortdash"
-                },*/
+                },
                 {
                     label: {
                         text: "Friendly Fire 9",
@@ -438,6 +438,26 @@ function createChart() {
                         }
                     },
                     value: 1021778,
+                    dashStyle: "shortdash"
+                },
+                {
+                    label: {
+                        text: "Friendly Fire 10",
+                        style: {
+                            color: textColor
+                        }
+                    },
+                    value: 1236789,
+                    dashStyle: "shortdash"
+                },*/
+                {
+                    label: {
+                        text: "Friendly Fire 11",
+                        style: {
+                            color: textColor
+                        }
+                    },
+                    value: 1339614,
                     dashStyle: "shortdash"
                 }
             ]
@@ -491,12 +511,16 @@ function updateChart(year) {
     let render_data_donations = [];
     let render_data_donors = [];
     let i = 0;
+    if (data[year].length === 0) {
+        return;
+    }
     for (let date of data[year]) {
         i++;
         let date_date = new Date(date.updated_at);
         // Adjust day difference so the lines can overlap
         if (year !== currentYear) {
-            let new_date = date_date.getDate() + day_diffs[year];
+            let daydiff = year in day_diffs ? day_diffs[year] : 0;
+            let new_date = date_date.getDate() + daydiff;
             if (new_date < 1) {
                 date_date.setMonth(date_date.getMonth() - 1);
                 new_date = 30 + new_date;
@@ -577,8 +601,10 @@ function updateData(year) {
                 document.getElementById("currentAmount").innerText = str;
             } else {
                 chart.get(year + "").hide();
-                chart2.get(year + "_count").hide();
-                chart2.get(year + "_donors").hide();
+                if (year !== 2023) {
+                    chart2.get(year + "_count").hide();
+                    chart2.get(year + "_donors").hide();
+                }
             }
         }
     });
